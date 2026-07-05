@@ -57,5 +57,11 @@ def get_settings() -> Settings:
 
 def ensure_dirs() -> None:
     """Create the runtime directories if they do not exist."""
-    for d in (PAPERS_DIR, DATA_DIR, CACHE_DIR):
+    for d in (
+        PAPERS_DIR,
+        PAPERS_DIR / "foundations",
+        PAPERS_DIR / "datasheets",
+        DATA_DIR,
+        CACHE_DIR,
+    ):
         d.mkdir(parents=True, exist_ok=True)
