@@ -17,17 +17,22 @@ def export_html(output: str = "data/graph.html") -> Path:
     net = Network(height="800px", width="100%", directed=True, notebook=False)
     net.barnes_hut()
 
+    # Colour + size by node kind; seed papers stand out from cited-only papers.
+    color = {"paper": "#4c78a8", "foundation": "#54a24b",
+             "component": "#e0843d", "concept": "#b279a2"}
+    size = {"paper": 16, "foundation": 20, "component": 20, "concept": 12}
     for node, data in g.nodes(data=True):
+        kind = data.get("kind", "paper")
         is_seed = data.get("is_seed") in (True, "true", "True")
         net.add_node(
             node,
             label=(data.get("title", node) or node)[:40],
-            title=data.get("title", node),
-            color="#e0533d" if is_seed else "#4c78a8",
-            size=25 if is_seed else 12,
+            title=f"[{kind}] {data.get('title', node)}",
+            color="#e0533d" if (kind == "paper" and is_seed) else color.get(kind, "#4c78a8"),
+            size=26 if (kind == "paper" and is_seed) else size.get(kind, 12),
         )
-    for src, dst in g.edges():
-        net.add_edge(src, dst)
+    for src, dst, edata in g.edges(data=True):
+        net.add_edge(src, dst, title=edata.get("etype", ""))
 
     out = Path(output)
     out.parent.mkdir(parents=True, exist_ok=True)

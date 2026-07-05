@@ -42,13 +42,23 @@ class VectorStore:
         return {c.source_id for c in self._chunks}
 
     # ---- search --------------------------------------------------------------
-    def search(self, query: str, k: int = 6) -> list[SearchHit]:
+    def search(
+        self, query: str, k: int = 6, where_source: set[str] | None = None
+    ) -> list[SearchHit]:
+        """Top-k chunks by cosine similarity. `where_source`, if given, restricts
+        results to chunks from those source ids (used for concept-bridge grounding)."""
         if self._matrix is None or not self._chunks:
             return []
         q = _normalize(embeddings.embed_query(query)[None, :])[0]
         scores = self._matrix @ q  # cosine, since everything is normalized
-        top = np.argsort(-scores)[:k]
-        return [SearchHit(chunk=self._chunks[i], score=float(scores[i])) for i in top]
+        hits: list[SearchHit] = []
+        for i in np.argsort(-scores):
+            if where_source is not None and self._chunks[i].source_id not in where_source:
+                continue
+            hits.append(SearchHit(chunk=self._chunks[i], score=float(scores[i])))
+            if len(hits) >= k:
+                break
+        return hits
 
     # ---- persistence ---------------------------------------------------------
     def save(self, path: Path = VECTORSTORE_PATH) -> None:
