@@ -24,6 +24,8 @@ VECTORSTORE_PATH = DATA_DIR / "vectorstore.json"
 GRAPH_PATH = DATA_DIR / "citation_graph.gexf"
 CORPUS_PATH = DATA_DIR / "corpus.json"  # metadata for every ingested paper
 CACHE_DIR = DATA_DIR / "cache"  # cached Semantic Scholar responses
+LEARNED_ALIASES_PATH = DATA_DIR / "learned_aliases.json"  # concept aliases learned on ingest
+UNMAPPED_PATH = DATA_DIR / "unmapped_concepts.json"  # phrases that hit the "other" route
 
 
 class Settings(BaseSettings):
