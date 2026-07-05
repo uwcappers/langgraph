@@ -24,7 +24,7 @@ from rich.console import Console
 from .config import PAPERS_DIR, ensure_dirs
 from .corpus import load_corpus, save_corpus, upsert
 from .enrich.semantic_scholar import SemanticScholarClient, raw_to_paper
-from .graph.citation_graph import build_graph, save_graph
+from .graph.citation_graph import build_graph, graph_summary, save_graph
 from .graph.concepts import extract_concepts
 from .ingest.chunker import chunk_source
 from .ingest.datasheet import extract_component
@@ -125,19 +125,16 @@ def ingest_papers(
     finally:
         s2.close()
 
-    # Citation graph is still papers-only until increment 5 wires typed nodes/edges.
-    g = build_graph([s for s in corpus if isinstance(s, Paper)])
+    # The heterogeneous knowledge graph: papers + foundations + components + concepts.
+    g = build_graph(corpus)
     save_graph(g)
     store.save()
     save_corpus(corpus)
 
-    kinds = {"paper": 0, "foundation": 0, "component": 0}
-    for s in corpus:
-        kinds[s.kind] = kinds.get(s.kind, 0) + 1
+    summary = graph_summary(g)
+    nodes, edges = summary["nodes"], summary["edges"]
     console.print(
-        f"\n[bold green]Done.[/] corpus: {kinds['paper']} papers, "
-        f"{kinds['foundation']} foundation sections, {kinds['component']} components · "
-        f"{g.number_of_nodes()} graph nodes, {g.number_of_edges()} citation edges."
+        f"\n[bold green]Done.[/] nodes: {_fmt(nodes)} · edges: {_fmt(edges)}"
     )
     return result
 
@@ -216,3 +213,7 @@ def _section_label(number: str | None, title: str) -> str:
 def _dedupe(items: list[str]) -> list[str]:
     seen: set[str] = set()
     return [x for x in items if not (x in seen or seen.add(x))]
+
+
+def _fmt(counts: dict) -> str:
+    return ", ".join(f"{v} {k}" for k, v in sorted(counts.items())) or "0"
