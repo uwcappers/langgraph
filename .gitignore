@@ -19,9 +19,8 @@ data/
 .cache/
 *.onnx
 
-# Papers (PDFs are large / possibly copyrighted — keep them local)
-papers/*.pdf
-papers/*.PDF
+papers/**/*.pdf
+papers/**/*.PDF
 
 # OS / editor
 .DS_Store
