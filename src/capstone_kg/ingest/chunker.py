@@ -38,14 +38,17 @@ def _split_text(text: str, size: int, overlap: int) -> list[str]:
     return chunks
 
 
-def chunk_paper(paper_id: str, paper_title: str, text: str) -> list[Chunk]:
+def chunk_source(
+    source_id: str, source_title: str, text: str, source_kind: str = "paper"
+) -> list[Chunk]:
     settings = get_settings()
     pieces = _split_text(text, settings.chunk_size, settings.chunk_overlap)
     return [
         Chunk(
-            chunk_id=f"{paper_id}::{i}",
-            paper_id=paper_id,
-            paper_title=paper_title,
+            chunk_id=f"{source_id}::{i}",
+            source_id=source_id,
+            source_title=source_title,
+            source_kind=source_kind,
             text=piece,
         )
         for i, piece in enumerate(pieces)

@@ -38,8 +38,8 @@ class VectorStore:
         self._chunks.extend(chunks)
         self._matrix = vecs if self._matrix is None else np.vstack([self._matrix, vecs])
 
-    def paper_ids(self) -> set[str]:
-        return {c.paper_id for c in self._chunks}
+    def source_ids(self) -> set[str]:
+        return {c.source_id for c in self._chunks}
 
     # ---- search --------------------------------------------------------------
     def search(self, query: str, k: int = 6) -> list[SearchHit]:

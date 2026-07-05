@@ -6,7 +6,7 @@ from capstone_kg.models import Paper, PaperRef
 
 def _seed(pid: str, refs: list[str]) -> Paper:
     return Paper(
-        paper_id=pid,
+        source_id=pid,
         title=f"Seed {pid}",
         is_seed=True,
         references=[PaperRef(paper_id=r, title=f"Ref {r}") for r in refs],

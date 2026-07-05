@@ -42,11 +42,11 @@ def _expand_node(g: nx.DiGraph):
         notes: list[str] = []
         seen: set[str] = set()
         for hit in state.get("hits", []):
-            pid = hit.chunk.paper_id
+            pid = hit.chunk.source_id
             if pid in seen or pid not in g:
                 continue
             seen.add(pid)
-            title = g.nodes[pid].get("title", hit.chunk.paper_title)
+            title = g.nodes[pid].get("title", hit.chunk.source_title)
             cites = [g.nodes[t].get("title", t) for t in g.successors(pid)][:5]
             cited_by = [g.nodes[s].get("title", s) for s in g.predecessors(pid)][:5]
             line = f'"{title}"'
@@ -85,7 +85,7 @@ def _answer_node():
             return {"answer": "No indexed papers matched this question. "
                               "Ingest papers first with `capstone ingest`."}
         sources = "\n\n".join(
-            f"[{i}] ({h.chunk.paper_title})\n{h.chunk.text[:1200]}"
+            f"[{i}] ({h.chunk.source_title})\n{h.chunk.text[:1200]}"
             for i, h in enumerate(hits, 1)
         )
         graph_notes = "\n".join(state.get("graph_notes", [])) or "(none)"

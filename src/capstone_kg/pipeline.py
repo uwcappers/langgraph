@@ -22,7 +22,7 @@ from .corpus import load_corpus, save_corpus, upsert
 from .enrich.semantic_scholar import SemanticScholarClient, raw_to_paper
 from .graph.citation_graph import build_graph, save_graph
 from .graph.concepts import extract_concepts
-from .ingest.chunker import chunk_paper
+from .ingest.chunker import chunk_source
 from .ingest.pdf_parser import parse_pdf
 from .models import Paper
 from .store.vectorstore import VectorStore
@@ -55,7 +55,7 @@ def ingest_papers(
 
     corpus = [] if rebuild else load_corpus()
     store = VectorStore() if rebuild else VectorStore.load()
-    already = store.paper_ids()
+    already = store.source_ids()
 
     s2 = SemanticScholarClient()
     matched = unmatched = 0
@@ -67,7 +67,7 @@ def ingest_papers(
             parsed = parse_pdf(pdf)
 
             paper = _resolve_paper(s2, parsed.title_guess, pdf.name)
-            if paper.paper_id.startswith("local:"):
+            if paper.source_id.startswith("local:"):
                 unmatched += 1
                 console.print(f"  [yellow]No Semantic Scholar match[/] — indexed text only.")
             else:
@@ -83,8 +83,8 @@ def ingest_papers(
                     console.print(f"  concepts: {', '.join(paper.concepts)}")
 
             # Embed chunks (skip if this paper is already in the store).
-            if paper.paper_id not in already:
-                chunks = chunk_paper(paper.paper_id, paper.title, parsed.full_text)
+            if paper.source_id not in already:
+                chunks = chunk_source(paper.source_id, paper.title, parsed.full_text)
                 store.add_chunks(chunks)
                 console.print(f"  embedded {len(chunks)} chunks")
 
@@ -111,11 +111,11 @@ def _resolve_paper(s2: SemanticScholarClient, title: str, filename: str) -> Pape
     match = s2.match_paper(title)
     if match and match.get("paperId"):
         full = s2.get_paper(match["paperId"]) or match
-        return raw_to_paper(full, is_seed=True, source_pdf=filename)
+        return raw_to_paper(full, is_seed=True, source_file=filename)
     # Fallback: no external metadata, but still searchable by content.
     return Paper(
-        paper_id=f"local:{_slug(Path(filename).stem)}",
+        source_id=f"local:{_slug(Path(filename).stem)}",
         title=title,
-        source_pdf=filename,
+        source_file=filename,
         is_seed=True,
     )

@@ -1,0 +1,44 @@
+[project]
+name = "capstone-kg"
+version = "0.1.0"
+description = "A LangGraph knowledge graph over engineering-capstone research papers (dexterous force-sensing glove)."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # LLM / orchestration
+    "langchain-core>=0.3",
+    "langgraph>=0.2",
+    "langchain-anthropic>=0.3",
+    # Local embeddings (ONNX, no torch)
+    "fastembed>=0.4",
+    # PDF parsing
+    "pymupdf>=1.24",
+    # Graph
+    "networkx>=3.2",
+    # HTTP client for Semantic Scholar / arXiv
+    "httpx>=0.27",
+    # Config / CLI / models
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "python-dotenv>=1.0",
+    "typer>=0.12",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+# Graph visualization export helpers
+viz = ["matplotlib>=3.8", "pyvis>=0.3"]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[project.scripts]
+capstone = "capstone_kg.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/capstone_kg"]
+
+[tool.ruff]
+line-length = 100

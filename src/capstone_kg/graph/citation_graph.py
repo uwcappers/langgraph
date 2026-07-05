@@ -27,7 +27,7 @@ def build_graph(papers: list[Paper]) -> nx.DiGraph:
     the cited papers themselves.
     """
     g = nx.DiGraph()
-    seed_ids = {p.paper_id for p in papers if p.is_seed}
+    seed_ids = {p.source_id for p in papers if p.is_seed}
 
     for p in papers:
         _add_paper_node(g, p)
@@ -44,7 +44,7 @@ def build_graph(papers: list[Paper]) -> nx.DiGraph:
                     doi=ref.doi or "",
                     url="",
                 )
-            g.add_edge(p.paper_id, ref.paper_id)
+            g.add_edge(p.source_id, ref.paper_id)
 
     # Mark which reference nodes are actually seeds (in case order matters).
     for sid in seed_ids:
@@ -55,7 +55,7 @@ def build_graph(papers: list[Paper]) -> nx.DiGraph:
 
 def _add_paper_node(g: nx.DiGraph, p: Paper) -> None:
     g.add_node(
-        p.paper_id,
+        p.source_id,
         title=p.title,
         year=p.year or 0,
         is_seed=p.is_seed,

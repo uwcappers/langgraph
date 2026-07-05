@@ -106,7 +106,7 @@ def _external_ids(raw: dict) -> tuple[str | None, str | None]:
     return ext.get("DOI"), ext.get("ArXiv")
 
 
-def raw_to_paper(raw: dict, *, is_seed: bool, source_pdf: str | None = None) -> Paper:
+def raw_to_paper(raw: dict, *, is_seed: bool, source_file: str | None = None) -> Paper:
     """Convert a Semantic Scholar paper record into our Paper model."""
     doi, arxiv = _external_ids(raw)
     refs: list[PaperRef] = []
@@ -124,7 +124,7 @@ def raw_to_paper(raw: dict, *, is_seed: bool, source_pdf: str | None = None) -> 
             )
         )
     return Paper(
-        paper_id=raw.get("paperId") or (source_pdf or raw.get("title", "unknown")),
+        source_id=raw.get("paperId") or (source_file or raw.get("title", "unknown")),
         title=raw.get("title", "Untitled"),
         abstract=raw.get("abstract"),
         year=raw.get("year"),
@@ -134,7 +134,7 @@ def raw_to_paper(raw: dict, *, is_seed: bool, source_pdf: str | None = None) -> 
         doi=doi,
         arxiv_id=arxiv,
         url=raw.get("url"),
-        source_pdf=source_pdf,
+        source_file=source_file,
         is_seed=is_seed,
         references=refs,
         citation_count=raw.get("citationCount", 0) or 0,
